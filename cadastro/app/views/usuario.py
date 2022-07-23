@@ -7,7 +7,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
 
-    http_method_names = ['get', 'post'] # TODO: Permitir que usuário visualize apenas os próprios dados
+    http_method_names = ['get', 'post', 'patch', 'put']
     
     @authentication_classes([])
     def create(self, request, *args, **kwargs):
@@ -19,3 +19,10 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         else:
             permissions = super().get_permissions()
         return permissions
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        # Caso usuário não seja um superuser, retorna os dados do próprio usuário são retornados.
+        if not self.request.user.is_superuser:
+            queryset = queryset.filter(id=self.request.user.id)
+        return queryset

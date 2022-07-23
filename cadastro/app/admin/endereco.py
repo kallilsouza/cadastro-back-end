@@ -10,5 +10,5 @@ class EnderecoAdmin(admin.ModelAdmin):
 
     def usuario(self, obj):
         if obj.usuario:
-            return obj.usuario.nome()
+            return obj.usuario.nome
         return None

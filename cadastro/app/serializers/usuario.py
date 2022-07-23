@@ -3,38 +3,45 @@ from rest_framework import serializers
 from app.models import Usuario, Endereco
 from .endereco import EnderecoSerializer
 from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
+from collections import OrderedDict
+from rest_framework.exceptions import ValidationError
 
 class UsuarioSerializer(serializers.ModelSerializer):
-    nome = serializers.CharField(source='auth_user.first_name')
-    email = serializers.EmailField(source='auth_user.email')
-    cpf = serializers.CharField()
-    pis = serializers.CharField()
+    password = serializers.CharField(write_only=True)
     endereco = EnderecoSerializer()
-    senha = serializers.CharField(source='auth_user.password')
+    pis = serializers.CharField(required=True)
+    cpf = serializers.CharField(required=True)
 
     class Meta:
         model = Usuario
-        fields = ('id', 'nome', 'email', 'cpf', 'pis', 'senha', 'endereco')
+        fields = ('id', 'nome', 'email', 'cpf', 'pis', 'password', 'endereco', 'password')
 
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data.pop('senha')
-        return data
+    def is_valid(self, raise_exception=False):
+        errors = OrderedDict()
+        if 'pis' in self.initial_data:
+            if Usuario.objects.filter(pis=self.initial_data['pis']).exists():
+                errors['pis'] = 'PIS already exists'
+        if 'cpf' in self.initial_data:
+            if Usuario.objects.filter(cpf=self.initial_data['cpf']).exists():
+                errors['cpf'] = 'CPF already exists'
+        if errors:
+            raise ValidationError(errors)
+        return super().is_valid(raise_exception=raise_exception)
 
     @transaction.atomic
     def create(self, validated_data):
-        user_data = validated_data.pop('auth_user')
-        user_data['username'] = user_data['email']
-        if User.objects.filter(username=user_data['username']).count() > 0:
-            raise serializers.ValidationError({'user':'Usuário com este username já existe'})
-        user = User(username=user_data['username'], 
-                                   email=user_data['email'], 
-                                   first_name=user_data['first_name'])
-        user.set_password(user_data['password'])
-        user.save()
-        validated_data['auth_user'] = user
+        password = validated_data.pop('password')
         endereco_data = validated_data.pop('endereco')
         endereco = Endereco.objects.create(**endereco_data)
         endereco.save()
         validated_data['endereco'] = endereco
+        if 'password' in validated_data:
+            validated_data['password'] = make_password(validated_data['password'])
         return super().create(validated_data)
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        if 'password' in validated_data:
+            validated_data['password'] = make_password(validated_data['password'])
+        return super().update(instance, validated_data)
