@@ -30,14 +30,12 @@ class UsuarioSerializer(serializers.ModelSerializer):
         return super().is_valid(raise_exception=raise_exception)
 
     @transaction.atomic
-    def create(self, validated_data):
-        password = validated_data.pop('password')
+    def create(self, validated_data):        
         endereco_data = validated_data.pop('endereco')
         endereco = Endereco.objects.create(**endereco_data)
         endereco.save()
         validated_data['endereco'] = endereco
-        if 'password' in validated_data:
-            validated_data['password'] = make_password(validated_data['password'])
+        validated_data['password'] = make_password(validated_data['password'])
         return super().create(validated_data)
 
     @transaction.atomic

@@ -25,9 +25,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-+bd=&a3^0ut^j^5k!kirccfpw_+$rqe&wyvg#&emxml_x7uk18'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.environ.get('DEBUG').lower() == 'true'
 
-ALLOWED_HOSTS = ['localhost']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
+CORS_ORIGIN_WHITELIST = os.environ.get('CORS_ORIGIN_WHITELIST', '').split(',')
 
 AUTH_USER_MODEL = 'app.Usuario'
 
