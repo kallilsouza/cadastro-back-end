@@ -63,8 +63,8 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         pis_validator = PIS()
         if self.cpf:
             if not cpf_validator.validate(self.cpf):
-                raise ValidationError('CPF inválido')
+                raise ValidationError({'cpf': 'CPF inválido'})
         if self.pis:
             if not pis_validator.validate(self.pis):
-                raise ValidationError('PIS inválido')
+                raise ValidationError({'pis': 'PIS inválido'})
         return super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)

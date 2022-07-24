@@ -21,10 +21,10 @@ class UsuarioSerializer(serializers.ModelSerializer):
         errors = OrderedDict()
         if 'pis' in self.initial_data:
             if Usuario.objects.filter(pis=self.initial_data['pis']).exists():
-                errors['pis'] = 'PIS already exists'
+                errors['pis'] = 'PIS já cadastrado'
         if 'cpf' in self.initial_data:
             if Usuario.objects.filter(cpf=self.initial_data['cpf']).exists():
-                errors['cpf'] = 'CPF already exists'
+                errors['cpf'] = 'CPF já cadastrado'
         if errors:
             raise ValidationError(errors)
         return super().is_valid(raise_exception=raise_exception)
