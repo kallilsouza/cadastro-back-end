@@ -3,3 +3,9 @@ from rest_framework import serializers
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     username_field = 'login'
+    
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['username'] = user.nome
+        return token
