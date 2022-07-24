@@ -7,7 +7,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
 
-    http_method_names = ['get', 'post', 'patch', 'put']
+    http_method_names = ['get', 'post', 'patch', 'put', 'delete']
     
     @authentication_classes([])
     def create(self, request, *args, **kwargs):
