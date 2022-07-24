@@ -49,11 +49,12 @@ class UsuarioSerializer(serializers.ModelSerializer):
         if 'endereco' in validated_data:
             endereco_data = validated_data.pop('endereco')
             if instance.endereco:
-                instance.endereco.pais = endereco_data['pais']
-                instance.endereco.estado = endereco_data['estado']
-                instance.endereco.municipio = endereco_data['municipio']
-                instance.endereco.cep = endereco_data['cep']
-                instance.endereco.rua = endereco_data['rua']
-                instance.endereco.numero = endereco_data['numero']
+                instance.endereco.pais = endereco_data.get('pais', instance.endereco.pais)
+                instance.endereco.estado = endereco_data.get('pais', instance.endereco.estado)
+                instance.endereco.municipio = endereco_data.get('pais', instance.endereco.municipio)
+                instance.endereco.cep = endereco_data.get('pais', instance.endereco.cep)
+                instance.endereco.rua = endereco_data.get('pais', instance.endereco.rua)
+                instance.endereco.numero = endereco_data.get('pais', instance.endereco.numero)
+                instance.endereco.complemento = endereco_data.get('pais', instance.endereco.complemento)
                 instance.endereco.save()
         return super().update(instance, validated_data)
