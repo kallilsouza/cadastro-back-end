@@ -20,11 +20,15 @@ class UsuarioSerializer(serializers.ModelSerializer):
     def is_valid(self, raise_exception=False):
         errors = OrderedDict()
         if 'pis' in self.initial_data:
-            if Usuario.objects.filter(pis=self.initial_data['pis']).exists():
-                errors['pis'] = 'PIS já cadastrado'
+            users = Usuario.objects.filter(pis=self.initial_data['pis'])
+            if users.exists():
+                if users.first().id != self.instance.id:
+                    errors['pis'] = 'PIS já cadastrado'
         if 'cpf' in self.initial_data:
-            if Usuario.objects.filter(cpf=self.initial_data['cpf']).exists():
-                errors['cpf'] = 'CPF já cadastrado'
+            users = Usuario.objects.filter(cpf=self.initial_data['cpf'])
+            if users.exists():
+                if users.first().id != self.instance.id:
+                    errors['cpf'] = 'CPF já cadastrado'
         if errors:
             raise ValidationError(errors)
         return super().is_valid(raise_exception=raise_exception)
@@ -42,4 +46,14 @@ class UsuarioSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if 'password' in validated_data:
             validated_data['password'] = make_password(validated_data['password'])
+        if 'endereco' in validated_data:
+            endereco_data = validated_data.pop('endereco')
+            if instance.endereco:
+                instance.endereco.pais = endereco_data['pais']
+                instance.endereco.estado = endereco_data['estado']
+                instance.endereco.municipio = endereco_data['municipio']
+                instance.endereco.cep = endereco_data['cep']
+                instance.endereco.rua = endereco_data['rua']
+                instance.endereco.numero = endereco_data['numero']
+                instance.endereco.save()
         return super().update(instance, validated_data)
